@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: exp-laravel-app
+    restart: always
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+      - laravel-network
+
+  db:
+    image: mysql:5.7
+    container_name: exp-laravel-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3307:3306"
+    networks:
+      - laravel-network
+
+  nginx:
+    image: nginx:latest
+    container_name: exp-laravel-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app  # ✅ Ye theek hai, bas `app` ke andar `nginx` ka reference hatao
+    networks:
+      - laravel-network
+
+networks:
+  laravel-network:

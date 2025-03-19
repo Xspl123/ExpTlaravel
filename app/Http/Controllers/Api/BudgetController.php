@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller; // ✅ Yeh line add karein
 use App\Services\BudgetService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +13,10 @@ use Illuminate\Support\Facades\Auth;
 
 class BudgetController extends Controller
 {
-    private BudgetService $budgetService;
+    /**
+     * @var BudgetService
+     */
+    private $budgetService;
 
     public function __construct(BudgetService $budgetService)
     {

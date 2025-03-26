@@ -39,7 +39,7 @@ class CategoryController extends Controller
 
         $category = $this->categoryService->createCategory($data);
         
-        return response()->json($category, 201);
+        return response()->json(['message','Category Create successfully',$category], 201);
     }
 
     public function show(int $id): JsonResponse

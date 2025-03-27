@@ -1,4 +1,4 @@
-name: Deploy Laravel App
+name: Deploy Laravel & React App
 
 on:
   push:
@@ -17,15 +17,23 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD || 'missing-secret' }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME || 'missing-secret' }}" --password-stdin
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Laravel App Image
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: xspl/laravel-app:latest
+
+      - name: Build and Push React App Image
+        uses: docker/build-push-action@v3
+        with:
+          context: /home/abhi/react-admin-panel
+          file: /home/abhi/react-admin-panel/Dockerfile
+          push: true
+          tags: xspl/react-admin-panel:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -37,10 +45,19 @@ jobs:
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SERVER_SSH_KEY || 'missing-secret' }}
           script: |
-            docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" -p "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+            docker login -u "${{ secrets.DOCKER_HUB_USERNAME || 'missing-secret' }}" -p "${{ secrets.DOCKER_HUB_PASSWORD || 'missing-secret' }}"
+            
+            # Pull latest images
             docker pull xspl/laravel-app:latest
-            docker stop laravel_app || true
-            docker rm laravel_app || true
-            docker run -d --name laravel_app -p 80:9000 xspl/laravel-app:latest
+            docker pull xspl/react-admin-panel:latest
+            docker pull mysql:5.7
+            docker pull nginx:latest
+
+            # Stop and remove existing containers
+            cd /path/to/docker-compose-dir
+            docker-compose down
+
+            # Start new containers
+            docker-compose up -d --force-recreate --remove-orphans

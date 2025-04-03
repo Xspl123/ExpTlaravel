@@ -44,6 +44,7 @@ services:
     build:
       context: /home/abhi/react-admin-panel
     container_name: react-container
+    restart: always
     ports:
       - "5173:5173"  # ✅ Vite default port
     volumes:

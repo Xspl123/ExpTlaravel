@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use App\Repositories\BudgetRepositoryInterface;
+use App\Repositories\Interfaces\BudgetRepositoryInterface;
 use App\Models\Budget;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BudgetService
 {
@@ -15,28 +17,62 @@ class BudgetService
         $this->budgetRepository = $budgetRepository;
     }
 
-    public function createBudget(array $data): Budget
+    public function createBudget(array $data): ?Budget
     {
-        return $this->budgetRepository->create($data);
+        try {
+            return $this->budgetRepository->create($data);
+        } catch (\Exception $e) {
+            Log::error('Error creating budget: ' . $e->getMessage());
+            return null;
+        }
     }
 
-    public function getUserBudgets(int $userId, ?string $search = null, int $page = 1, int $limit = 10): array
+    public function getUserBudgets(int $userId, array $filters = []): LengthAwarePaginator
     {
-        return $this->budgetRepository->getAll($userId, $search, $page, $limit);
+        return $this->budgetRepository->getAll($userId, $filters);
     }
 
     public function getBudgetById(int $userId, int $id): ?Budget
     {
-        return $this->budgetRepository->findById($userId, $id);
+        try {
+            return $this->budgetRepository->findById($userId, $id);
+        } catch (ModelNotFoundException $e) {
+            Log::warning("Budget ID $id not found for user $userId");
+            return null;
+        } catch (\Exception $e) {
+            Log::error("Error fetching budget ID $id for user $userId: " . $e->getMessage());
+            return null;
+        }
     }
 
-    public function updateBudget(int $userId, int $id, array $data): bool
+ 
+    public function updateBudget(int $userId, int $categoryId, float $budgetAmount)
     {
-        return $this->budgetRepository->update($userId, $id, $data);
+        $budget = Budget::where('category_id', $categoryId)->where('user_id', $userId)->first();
+
+        if (!$budget) {
+            return ['error' => 'Budget not found'];
+        }
+
+        $updated = $this->budgetRepository->update($categoryId, ['budget_amount' => $budgetAmount]);
+
+        if (!$updated) {
+            return ['error' => 'Failed to update budget'];
+        }
+
+        return $budget->fresh(); // Return updated budget
     }
 
     public function deleteBudget(int $userId, int $id): bool
     {
-        return $this->budgetRepository->delete($userId, $id);
+        try {
+            return $this->budgetRepository->delete($userId, $id);
+        } catch (ModelNotFoundException $e) {
+            Log::warning("Budget ID $id not found for deletion (user $userId)");
+            return false;
+        } catch (\Exception $e) {
+            Log::error("Error deleting budget ID $id for user $userId: " . $e->getMessage());
+            return false;
+        }
     }
 }

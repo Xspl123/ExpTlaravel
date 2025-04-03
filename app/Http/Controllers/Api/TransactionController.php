@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use Illuminate\Http\Request;
 use App\Services\TransactionService;
-use App\Http\Controllers\Controller;
 
 class TransactionController extends Controller
 {

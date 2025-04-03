@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Transaction;
 use App\Models\Budget;
+use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -73,5 +74,10 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function updateBudget(Budget $budget, float $amount): bool
     {
         return $budget->update(['total_amount' => $amount]);
+    }
+
+    public function findAccountById(int $accountId)
+    {
+        return Account::find($accountId);
     }
 }

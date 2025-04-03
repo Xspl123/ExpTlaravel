@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\Budget;
+use App\Repositories\Interfaces\BudgetRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class BudgetRepository implements BudgetRepositoryInterface
 {
@@ -13,23 +15,15 @@ class BudgetRepository implements BudgetRepositoryInterface
         return Budget::create($data);
     }
 
-    public function getAll(int $userId, ?string $search = null, int $page = 1, int $limit = 10): array
+    public function getAll(int $userId, array $filters = []): LengthAwarePaginator
     {
-        $query = Budget::where('user_id', $userId);
+        $query = Budget::where('user_id', $userId)->with(['category', 'account', 'user']);
 
-        if ($search) {
-            $query->where('budget_amount', 'LIKE', "%$search%");
+        if (!empty($filters['search'])) {
+            $query->where('description', 'like', '%' . $filters['search'] . '%');
         }
 
-        $total = $query->count();
-        $budgets = $query->paginate($limit, ['*'], 'page', $page);
-
-        return [
-            'data' => $budgets->items(),
-            'total' => $total,
-            'total_pages' => ceil($total / $limit),
-            'current_page' => $page,
-        ];
+        return $query->orderBy('created_at', 'desc')->paginate($filters['limit'] ?? 10);
     }
 
     public function findById(int $userId, int $id): ?Budget
@@ -37,16 +31,22 @@ class BudgetRepository implements BudgetRepositoryInterface
         return Budget::where('user_id', $userId)->findOrFail($id);
     }
 
-    public function update(int $userId, int $id, array $data): bool
+    public function update(int $categoryId, array $data): bool
     {
-        $budget = Budget::where('user_id', $userId)->find($id);
+        $budget = Budget::where('category_id', $categoryId)
+                        ->where('user_id', Auth::id())
+                        ->first();
 
         if (!$budget) {
-            throw new ModelNotFoundException("Budget not found.");
+            return false; // Budget not found
         }
 
-        return $budget->update($data);
+        // Add new amount to existing budget_amount
+        $newAmount = $budget->budget_amount + $data['budget_amount'];
+
+        return $budget->update(['budget_amount' => $newAmount]);
     }
+
 
     public function delete(int $userId, int $id): bool
     {
@@ -56,6 +56,6 @@ class BudgetRepository implements BudgetRepositoryInterface
             throw new ModelNotFoundException("Budget not found.");
         }
 
-        return $budget->delete();
+        return (bool) $budget->delete();
     }
 }

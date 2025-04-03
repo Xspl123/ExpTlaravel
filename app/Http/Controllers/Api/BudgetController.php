@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller; // ✅ Yeh line add karein
+use App\Http\Controllers\Controller;
 use App\Services\BudgetService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +29,7 @@ class BudgetController extends Controller
     public function store(BudgetRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $data['user_id'] = auth()->id;
+        $data['user_id'] = Auth::user()->id;
         $budget = $this->budgetService->createBudget($data);
 
         return response()->json([
@@ -43,18 +43,24 @@ class BudgetController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $userId =Auth::user()->id;
-        $search = $request->query('search', null);
-        $page = $request->query('page', 1);
-        $limit = $request->query('limit', 10);
+        $userId = Auth::id();
+        $filters = [
+            'search' => $request->query('search', null),
+            'page'   => $request->query('page', 1),
+            'limit'  => $request->query('limit', 10),
+        ];
 
-        $budgets = $this->budgetService->getUserBudgets($userId, $search, $page, $limit);
+        $budgets = $this->budgetService->getUserBudgets($userId, $filters);
 
         return response()->json([
             'message' => 'Budgets retrieved successfully',
-            'data' => $budgets
+            'data'    => $budgets
         ], Response::HTTP_OK);
     }
+
+
+
+    
 
     /**
      * Fetch a specific budget entry
@@ -74,24 +80,27 @@ class BudgetController extends Controller
         ], Response::HTTP_OK);
     }
 
-    /**
-     * Update an existing budget entry
-     */
-    public function update(BudgetRequest $request, $id): JsonResponse
+   
+
+    public function update(Request $request, $categoryId)
     {
-        $userId =Auth::user()->id;
-        $data = $request->validated();
+        $validated = $request->validate([
+            'budget_amount' => 'required|numeric',
+        ]);
 
-        $updated = $this->budgetService->updateBudget($userId, $id, $data);
+        $userId = Auth::id();
+        $result = $this->budgetService->updateBudget($userId, $categoryId, $validated['budget_amount']);
 
-        if (!$updated) {
-            return response()->json(['message' => 'Budget update failed'], Response::HTTP_BAD_REQUEST);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 400);
         }
 
         return response()->json([
-            'message' => 'Budget updated successfully'
-        ], Response::HTTP_OK);
+            'message' => 'Budget amount updated successfully',
+            'budget' => $result
+        ], 200);
     }
+
 
     /**
      * Delete a budget entry

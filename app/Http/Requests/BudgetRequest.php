@@ -15,7 +15,7 @@ class BudgetRequest extends FormRequest
     {
         return [
             'category_id'   => 'required|exists:categories,id',
-            'total_amount'  => 'required|numeric|min:0',
+            'total_amount'  => 'nullable|numeric|min:0',
             'budget_amount' => 'nullable|numeric|min:0',
         ];
     }

@@ -4,6 +4,7 @@ namespace App\Repositories\Interfaces;
 
 use App\Models\Transaction;
 use App\Models\Budget;
+use App\Models\Account;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface TransactionRepositoryInterface
@@ -16,4 +17,5 @@ interface TransactionRepositoryInterface
     public function findBudgetByCategory(int $categoryId): Budget;
     public function updateBudget(Budget $budget, float $amount): bool;
     public function createBudget(array $data): Budget;
+    public function findAccountById(int $accountId);
 }

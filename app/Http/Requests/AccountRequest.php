@@ -15,7 +15,7 @@ class AccountRequest extends FormRequest
     {
         return [
            'account_name' => 'required|string|max:255|unique:accounts,account_name',
-            'account_balance' => 'nullable|numeric|min:0',
+            'account_balance' => 'nullable',
         ];
     }
 }

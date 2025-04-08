@@ -31,7 +31,7 @@ class AccountRepository implements AccountRepositoryInterface
     public function update(int $userId, int $id, array $data): bool
     {
         $account = Account::where('user_id', $userId)->where('id', $id)->first();
-        return $account ? $account->update($data) : false;
+        return $account ? $account->fill($data)->save() : false;
     }
 
     public function delete(int $userId, int $id): bool

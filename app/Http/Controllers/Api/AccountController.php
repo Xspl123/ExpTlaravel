@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AccountService;
 use App\Http\Requests\AccountRequest;
+use App\Http\Requests\AccountUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -50,10 +51,10 @@ class AccountController extends Controller
         return response()->json(['data' => $account]);
     }
 
-    public function update(AccountRequest $request, int $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
         $userId = $request->user()->id;
-        $updated = $this->accountService->updateAccount($userId, $id, $request->validated());
+        $updated = $this->accountService->updateAccount($userId, $id, $request->all());
 
         if (!$updated) {
             return response()->json(['message' => 'Failed to update account'], 400);

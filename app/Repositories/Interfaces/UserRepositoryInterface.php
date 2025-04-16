@@ -11,4 +11,6 @@ interface UserRepositoryInterface
     public function logout(User $user);
     public function getUserById(int $id);
     public function resetPassword(array $credentials);
+    public function getAllUsers();
+
 }

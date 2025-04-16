@@ -10,6 +10,7 @@ use App\Http\Requests\LoginRequest;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -62,7 +63,6 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
-
     public function sendPasswordResetLink(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -81,5 +81,27 @@ class AuthController extends Controller
         return $status === 'password_reset_success'
             ? response()->json(['message' => 'Password reset successfully.'])
             : response()->json(['message' => 'User not found.'], 400);
+    }
+
+    public function uploadFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store('uploads', 'public');
+
+        return response()->json([
+            'message' => 'File uploaded successfully',
+            'path' => $path,
+        ]);
+    }
+
+    public function getAllUsers ()
+    {
+        $users = $this->userRepository->getAllUsers();
+
+        return response()->json($users);
     }
 }

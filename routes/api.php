@@ -13,6 +13,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'userProfile']);
+    Route::get('/users/list', [AuthController::class, 'getAllUsers']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/password-reset', [AuthController::class, 'sendPasswordResetLink']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transactions', [TransactionController::class, 'getTransactions']);
     Route::put('/transactions/{id}', [TransactionController::class, 'updateTransaction']);
     Route::delete('/transactions/{id}', [TransactionController::class, 'deleteTransaction']);
+    Route::post('/upload-file', [TransactionController::class, 'uploadFile']);
 
     // Categories Routes
     Route::get('/categories', [CategoryController::class, 'index']);

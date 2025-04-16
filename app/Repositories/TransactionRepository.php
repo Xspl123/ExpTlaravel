@@ -80,4 +80,16 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         return Account::find($accountId);
     }
+
+    public function uploadFile(array $fileData): bool
+    {
+        // Implement file upload logic here
+        // Example: Save the file to storage and return true if successful
+        try {
+            $filePath = $fileData['file']->store('uploads');
+            return !empty($filePath);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

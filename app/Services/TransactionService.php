@@ -26,37 +26,6 @@ class TransactionService
         $this->categoryRepository = $categoryRepository;
     }
 
-    // public function createTransaction(array $data)
-    // {
-    //     $data['user_id'] = Auth::id();
-
-    //     $budget = $this->transactionRepository->findBudgetByCategory($data['category_id']);
-
-    //     if (!$budget) {
-    //         // Agar budget exist nahi karta, to naya budget entry karein
-    //         $budget = $this->transactionRepository->createBudget([
-    //             'category_id'   => $data['category_id'],
-    //             'user_id'       => $data['user_id'],
-    //             'budget_amount' => 0, // Default budget_amount
-    //             'total_amount'  => 0  // Default total_amount
-    //         ]);
-    //     }
-
-    //     $newTotalAmount = ($budget->total_amount ?? 0) + $data['amount'];
-
-    //     if ($budget->budget_amount > 0 && $newTotalAmount > $budget->budget_amount) {
-    //         return ['error' => 'Budget exceeded for this category!'];
-    //     }
-
-    //     $transaction = $this->transactionRepository->create($data);
-
-    //     if ($budget) {
-    //         $this->transactionRepository->updateBudget($budget, $newTotalAmount);
-    //     }
-
-    //     return $transaction;
-    // }
-
     public function createTransaction(array $data)
     {
         $data['user_id'] = Auth::id();
@@ -105,7 +74,10 @@ class TransactionService
         return $transaction;
     }
 
-
+    public function uploadFile(array $fileData): bool
+    {
+        return $this->transactionRepository->uploadFile($fileData);
+    }
 
     public function getTransactions($filters)
     {

@@ -49,4 +49,10 @@ class UserRepository implements UserRepositoryInterface
 
         return 'password_reset_success';
     }
+
+    public function getAllUsers()
+    {
+        return User::all();
+    }
+    
 }

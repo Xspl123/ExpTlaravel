@@ -18,4 +18,5 @@ interface TransactionRepositoryInterface
     public function updateBudget(Budget $budget, float $amount): bool;
     public function createBudget(array $data): Budget;
     public function findAccountById(int $accountId);
+    public function uploadFile(array $fileData): bool;
 }

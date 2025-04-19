@@ -34,8 +34,17 @@ class TransactionController extends Controller
         $filters = [
             'search' => $request->query('search', ''),
             'page' => $request->query('page', 1),
-            'limit' => $request->query('limit', 10),
+            'limit' => $request->query('limit', 1000),
         ];
+
+        if ((int)$filters['limit'] === 0) {
+            // Retrieve all transactions without pagination
+            $transactions = $this->transactionService->getAllTransactions($filters['search']);
+            return response()->json([
+                'message' => 'All transactions retrieved successfully',
+                'transactions' => $transactions,
+            ], 200);
+        }
 
         $transactions = $this->transactionService->getTransactions($filters);
         return response()->json([

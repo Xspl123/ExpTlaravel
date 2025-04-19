@@ -24,7 +24,7 @@ class CategoryController extends Controller
             $request->user()->id,
             $request->query('search'),
             $request->query('page', 1),
-            $request->query('limit', 10)
+            $request->query('limit', 1000)
         );
         
         return response()->json($categories);
